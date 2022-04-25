@@ -6,14 +6,19 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/3bl3gamer/tgclient"
 	"github.com/3bl3gamer/tgclient/mtproto"
+	"github.com/adrg/xdg"
 	"github.com/akamensky/argparse"
 )
+
+const programName = "telegram-export-stickers"
+const sessionFilePath = "telegram-export-stickers/tg.session"
 
 func FormatDate(date int32) string {
 	return time.Unix(int64(date), 0).UTC().Format(time.RFC3339)
@@ -46,8 +51,24 @@ func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_documen
 }
 
 func (t *Telegram) SignIn() error {
-	t.tg = *tgclient.NewTGClient(t.AppID, t.AppHash, &DummyLogHandler{})
-	err := t.tg.InitAndConnect()
+	appConfig := &mtproto.AppConfig{
+		AppID:          t.AppID,
+		AppHash:        t.AppHash,
+		AppVersion:     "0.0.1",
+		DeviceModel:    "Unknown",
+		SystemVersion:  runtime.GOOS + "/" + runtime.GOARCH,
+		SystemLangCode: "en",
+		LangPack:       "",
+		LangCode:       "en",
+	}
+	sessionFile, err := xdg.DataFile(sessionFilePath)
+	if err != nil {
+		return err
+	}
+	session := &mtproto.SessFileStore{FPath: sessionFile}
+	t.tg = *tgclient.NewTGClientExt(appConfig, session, &DummyLogHandler{}, nil)
+
+	err = t.tg.InitAndConnect()
 	if err != nil {
 		return err
 	}
@@ -189,7 +210,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 }
 
 func main() {
-	parser := argparse.NewParser("telegram-export-stickers", "Export sticker sets from telegram")
+	parser := argparse.NewParser(programName, "Export sticker sets from telegram")
 	stickerSetNames := parser.StringList("s", "stickerpacks", &argparse.Options{Required: false, Help: "Specify names or urls of stickerpacks to export (by default all stickerpacks of account are exported)."})
 	directory := parser.String("d", "directory", &argparse.Options{Required: false, Default: "stickers", Help: "Directory to export stickers to"})
 	appID := parser.Int("", "app-id", &argparse.Options{Required: false, Default: 17349, Help: "Test credentials are used by default"})
