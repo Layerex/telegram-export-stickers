@@ -90,7 +90,7 @@ func (t *Telegram) GetAllStickerSets() ([]mtproto.TL_stickerSet, error) {
 		return nil, errors.New("TL_messages_getAllStickers failed")
 	}
 
-	tl = t.Request(mtproto.TL_messages_getArchivedStickers{OffsetID: 0, Limit: 2147483647 /* 2 ** 31 - 1 */})
+	tl = t.Request(mtproto.TL_messages_getArchivedStickers{OffsetID: 0, Limit: (1 << 31) - 1})
 	archivedStickersRes, ok := tl.(mtproto.TL_messages_archivedStickers)
 	if !ok {
 		return nil, errors.New("TL_messages_getArchivedStickers failed")
