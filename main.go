@@ -222,7 +222,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = os.MkdirAll(*directory, 755)
+	err = os.MkdirAll(*directory, 0755)
 	if err != nil {
 		panic(err)
 	}
