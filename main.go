@@ -236,6 +236,7 @@ func main() {
 	t.AppHash = *appHash
 	t.SignIn()
 
+	fmt.Printf("Exporting stickerpacks to %s\n", *directory)
 	if len(*stickerSetNames) == 0 {
 		stickerSets, err := t.GetAllStickerSets()
 		if err != nil {
