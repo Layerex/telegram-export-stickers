@@ -25,14 +25,14 @@ func FormatDate(date int32) string {
 }
 
 type Telegram struct {
+	tgclient.TGClient
 	AppID   int32
 	AppHash string
-	tg      tgclient.TGClient
 	user    mtproto.TL_user
 }
 
 func (t *Telegram) Request(input mtproto.TLReq) mtproto.TL {
-	return t.tg.SendSyncRetry(input, time.Second, 0, time.Second*30)
+	return t.SendSyncRetry(input, time.Second, 0, time.Second*30)
 }
 
 type DummyProgressHandler struct{}
@@ -46,7 +46,7 @@ func (h *DummyLogHandler) Log(level mtproto.LogLevel, err error, msg string, arg
 func (h *DummyLogHandler) Message(isIncoming bool, msg mtproto.TL, id int64) {}
 
 func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_document) error {
-	_, err := t.tg.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &DummyProgressHandler{})
+	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &DummyProgressHandler{})
 	return err
 }
 
@@ -66,16 +66,16 @@ func (t *Telegram) SignIn() error {
 		return err
 	}
 	session := &mtproto.SessFileStore{FPath: sessionFile}
-	t.tg = *tgclient.NewTGClientExt(appConfig, session, &DummyLogHandler{}, nil)
+	t.TGClient = *tgclient.NewTGClientExt(appConfig, session, &DummyLogHandler{}, nil)
 
-	err = t.tg.InitAndConnect()
+	err = t.InitAndConnect()
 	if err != nil {
 		return err
 	}
 
 	authDataProvider := mtproto.ScanfAuthDataProvider{}
 	payload := mtproto.TL_users_getUsers{ID: []mtproto.TL{mtproto.TL_inputUserSelf{}}}
-	res, err := t.tg.AuthExt(authDataProvider, payload)
+	res, err := t.AuthExt(authDataProvider, payload)
 	if err != nil {
 		return err
 	}
