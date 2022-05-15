@@ -222,6 +222,11 @@ func main() {
 		os.Exit(2)
 	}
 
+	var t Telegram
+	t.AppID = int32(*appID)
+	t.AppHash = *appHash
+	t.SignIn()
+
 	err = os.MkdirAll(*directory, 0755)
 	if err != nil {
 		panic(err)
@@ -230,11 +235,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	var t Telegram
-	t.AppID = int32(*appID)
-	t.AppHash = *appHash
-	t.SignIn()
 
 	fmt.Printf("Exporting stickerpacks to %s\n", *directory)
 	if len(*stickerSetNames) == 0 {
