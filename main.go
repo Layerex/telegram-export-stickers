@@ -6,81 +6,20 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/3bl3gamer/tgclient"
 	"github.com/3bl3gamer/tgclient/mtproto"
 	"github.com/adrg/xdg"
 	"github.com/akamensky/argparse"
 )
 
 const programName = "telegram-export-stickers"
-const sessionFilePath = "telegram-export-stickers/tg.session"
+const sessionFile = "telegram-export-stickers/tg.session"
 
 func FormatDate(date int32) string {
 	return time.Unix(int64(date), 0).UTC().Format(time.RFC3339)
-}
-
-type Telegram struct {
-	tgclient.TGClient
-	AppID   int32
-	AppHash string
-	user    mtproto.TL_user
-}
-
-func (t *Telegram) Request(input mtproto.TLReq) mtproto.TL {
-	return t.SendSyncRetry(input, time.Second, 0, time.Second*30)
-}
-
-type DummyProgressHandler struct{}
-
-func (h *DummyProgressHandler) OnProgress(fileLocation mtproto.TL, offset, size int64) {}
-
-type DummyLogHandler struct{}
-
-func (h *DummyLogHandler) Log(level mtproto.LogLevel, err error, msg string, args ...interface{}) {}
-
-func (h *DummyLogHandler) Message(isIncoming bool, msg mtproto.TL, id int64) {}
-
-func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_document) error {
-	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &DummyProgressHandler{})
-	return err
-}
-
-func (t *Telegram) SignIn() error {
-	appConfig := &mtproto.AppConfig{
-		AppID:          t.AppID,
-		AppHash:        t.AppHash,
-		AppVersion:     "0.0.1",
-		DeviceModel:    "Unknown",
-		SystemVersion:  runtime.GOOS + "/" + runtime.GOARCH,
-		SystemLangCode: "en",
-		LangPack:       "",
-		LangCode:       "en",
-	}
-	sessionFile, err := xdg.DataFile(sessionFilePath)
-	if err != nil {
-		return err
-	}
-	session := &mtproto.SessFileStore{FPath: sessionFile}
-	t.TGClient = *tgclient.NewTGClientExt(appConfig, session, &DummyLogHandler{}, nil)
-
-	err = t.InitAndConnect()
-	if err != nil {
-		return err
-	}
-
-	authDataProvider := mtproto.ScanfAuthDataProvider{}
-	payload := mtproto.TL_users_getUsers{ID: []mtproto.TL{mtproto.TL_inputUserSelf{}}}
-	res, err := t.AuthExt(authDataProvider, payload)
-	if err != nil {
-		return err
-	}
-	t.user = res.(mtproto.VectorObject)[0].(mtproto.TL_user)
-	return nil
 }
 
 func (t *Telegram) GetAllStickerSets() ([]mtproto.TL_stickerSet, error) {
@@ -222,10 +161,15 @@ func main() {
 		os.Exit(2)
 	}
 
+	sessionFilePath, err := xdg.DataFile(sessionFile)
+	if err != nil {
+		panic(err)
+	}
+
 	var t Telegram
 	t.AppID = int32(*appID)
 	t.AppHash = *appHash
-	t.SignIn()
+	t.SignIn(sessionFilePath)
 
 	err = os.MkdirAll(*directory, 0755)
 	if err != nil {
