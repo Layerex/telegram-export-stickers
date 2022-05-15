@@ -132,10 +132,10 @@ type StickerSetMetadata struct {
 func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 	tl := t.Request(mtproto.TL_messages_getStickerSet{Stickerset: inputStickerSet})
 	stickerSetRes, ok := tl.(mtproto.TL_messages_stickerSet)
-	stickerSet := stickerSetRes.Set.(mtproto.TL_stickerSet)
 	if !ok {
 		return errors.New("TL_messages_getStickerSet failed")
 	}
+	stickerSet := stickerSetRes.Set.(mtproto.TL_stickerSet)
 
 	err := os.Mkdir(stickerSet.ShortName, 0755)
 	if err != nil && !errors.Is(err, os.ErrExist) {
