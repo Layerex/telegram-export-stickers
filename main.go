@@ -114,7 +114,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 			fmt.Printf("(%d/%d) Exporting sticker %s\n", i+1, len(stickerSetRes.Documents), filename)
 			err := t.DownloadDocument(filename, document)
 			if err != nil {
-				fmt.Printf("Failed to export sticker %s: %s", filename, err.Error())
+				fmt.Printf("Failed to export sticker %s: %s\n", filename, err.Error())
 			}
 		}
 	}
