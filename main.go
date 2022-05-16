@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/3bl3gamer/tgclient/mtproto"
 	"github.com/adrg/xdg"
@@ -17,10 +16,6 @@ import (
 
 const programName = "telegram-export-stickers"
 const sessionFile = "telegram-export-stickers/tg.session"
-
-func FormatDate(date int32) string {
-	return time.Unix(int64(date), 0).UTC().Format(time.RFC3339)
-}
 
 func (t *Telegram) GetAllStickerSets() ([]mtproto.TL_stickerSet, error) {
 	tl := t.Request(mtproto.TL_messages_getAllStickers{Hash: 0})
@@ -95,7 +90,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 		Masks:         stickerSet.Masks,
 		Official:      stickerSet.Official,
 		InstalledDate: FormatDate(stickerSet.InstalledDate),
-		ExportedDate:  time.Now().UTC().Format(time.RFC3339),
+		ExportedDate:  Now(),
 		Stickers:      make(map[int64]*StickerMetadata),
 	}
 
