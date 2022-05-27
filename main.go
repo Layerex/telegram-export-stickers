@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/3bl3gamer/tgclient/mtproto"
 	"github.com/adrg/xdg"
-	"github.com/akamensky/argparse"
 )
 
 const programName = "telegram-export-stickers"
@@ -144,39 +142,28 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 }
 
 func main() {
-	parser := argparse.NewParser(programName, "Export sticker sets from telegram")
-	stickerSetNames := parser.StringList("s", "stickerpacks", &argparse.Options{Required: false, Help: "Specify names or urls of stickerpacks to export (by default all stickerpacks of account are exported)."})
-	directory := parser.String("d", "directory", &argparse.Options{Required: false, Default: "stickers", Help: "Directory to export stickers to"})
-	appID := parser.Int("", "app-id", &argparse.Options{Required: false, Default: 17349, Help: "Test credentials are used by default"})
-	appHash := parser.String("", "app-hash", &argparse.Options{Required: false, Default: "344583e45741c457fe1862106095a5eb", Help: "Test credentials are used by default"})
+	args := ParseArgs()
 
-	err := parser.Parse(os.Args)
-	if err != nil {
-		fmt.Print(parser.Usage(err))
-		os.Exit(2)
-	}
-
+	var t Telegram
+	t.AppID = int32(args.AppID)
+	t.AppHash = args.AppHash
 	sessionFilePath, err := xdg.DataFile(sessionFile)
 	if err != nil {
 		panic(err)
 	}
-
-	var t Telegram
-	t.AppID = int32(*appID)
-	t.AppHash = *appHash
 	t.SignIn(sessionFilePath)
 
-	err = os.MkdirAll(*directory, 0755)
+	err = os.MkdirAll(args.Directory, 0755)
 	if err != nil {
 		panic(err)
 	}
-	err = os.Chdir(*directory)
+	err = os.Chdir(args.Directory)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("Exporting stickerpacks to %s\n", *directory)
-	if len(*stickerSetNames) == 0 {
+	fmt.Printf("Exporting stickerpacks to %s\n", args.Directory)
+	if len(args.StickerSetNames) == 0 {
 		stickerSets, err := t.GetAllStickerSets()
 		if err != nil {
 			panic(err)
@@ -190,14 +177,8 @@ func main() {
 			}
 		}
 	} else {
-		stickerPackUrlRegex := regexp.MustCompile("^(?:http://|https://)?[^/]+/addstickers/([^/]+)/*$")
-		for i, stickerSetName := range *stickerSetNames {
-			// Handle stickerpack urls
-			parts := stickerPackUrlRegex.FindStringSubmatch(stickerSetName)
-			if len(parts) > 0 {
-				stickerSetName = parts[1]
-			}
-			fmt.Printf("(%d/%d) Exporting stickerpack %s\n", i+1, len(*stickerSetNames), stickerSetName)
+		for i, stickerSetName := range args.StickerSetNames {
+			fmt.Printf("(%d/%d) Exporting stickerpack %s\n", i+1, len(args.StickerSetNames), stickerSetName)
 			err = t.ExportStickerSet(mtproto.TL_inputStickerSetShortName{ShortName: stickerSetName})
 			if err != nil {
 				panic(err)

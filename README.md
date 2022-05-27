@@ -12,20 +12,18 @@ sudo install telegram-export-stickers /usr/local/bin
 ## Usage
 
 ``` text
-usage: telegram-export-stickers [-h|--help] [-s|--stickerpacks "<value>"
-                                [-s|--stickerpacks "<value>" ...]]
-                                [-d|--directory "<value>"] [--app-id <integer>]
-                                [--app-hash "<value>"]
+usage: telegram-export-stickers [-h] [-d DIRECTORY] [--app-id APP_ID] [--app-hash APP_HASH] [STICKER_SETS ...]
 
-                                Export sticker sets from telegram
+Export sticker sets from telegram.
 
-Arguments:
+positional arguments:
+  STICKER_SETS          Sticker set names or urls
 
-  -h  --help          Print help information
-  -s  --stickerpacks  Specify names or urls of stickerpacks to export (by
-                      default all stickerpacks of account are exported),
-  -d  --directory     Directory to export stickers to. Default: stickers
-      --app-id        Test credentials are used by default. Default: 17349
-      --app-hash      Test credentials are used by default. Default:
-                      344583e45741c457fe1862106095a5eb
+options:
+  -h, --help            Show this help message and exit
+  -d DIRECTORY, --directory DIRECTORY
+                        Directory to export stickers to
+  --app-id APP_ID       Test credentials are used by default
+  --app-hash APP_HASH   Test credentials are used by default
+  -s, --stickerpacks    Ignored for compatibility
 ```

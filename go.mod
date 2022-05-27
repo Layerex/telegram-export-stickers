@@ -3,9 +3,11 @@ module Layerex/telegram-export-stickers
 go 1.18
 
 require (
-	github.com/3bl3gamer/tgclient v0.138.0 // indirect
-	github.com/adrg/xdg v0.4.0 // indirect
-	github.com/akamensky/argparse v1.3.1 // indirect
+	github.com/3bl3gamer/tgclient v0.138.0
+	github.com/adrg/xdg v0.4.0
+)
+
+require (
 	github.com/ansel1/merry v1.6.1 // indirect
 	github.com/ansel1/merry/v2 v2.0.0-beta.10 // indirect
 	github.com/fatih/color v1.12.0 // indirect
