@@ -7,8 +7,7 @@ import (
 	"strconv"
 )
 
-const helpMessage =
-`usage: %s [-h] [-d DIRECTORY] [--app-id APP_ID] [--app-hash APP_HASH] [STICKER_SETS ...]
+const helpMessage = `usage: %s [-h] [-d DIRECTORY] [--app-id APP_ID] [--app-hash APP_HASH] [STICKER_SETS ...]
 
 Export sticker sets from telegram.
 
@@ -84,10 +83,10 @@ func ParseArgs() Args {
 				stickerSetName = match[1]
 			} else {
 				// Handle sticker set names
-				if (stickerSetNameRegex.MatchString(os.Args[i])) {
+				if stickerSetNameRegex.MatchString(os.Args[i]) {
 					stickerSetName = os.Args[i]
 				} else {
-					panic(fmt.Sprintf("\"%s\" is not a sticker set name or an url", os.Args[i]));
+					panic(fmt.Sprintf("\"%s\" is not a sticker set name or an url", os.Args[i]))
 				}
 			}
 
@@ -102,13 +101,13 @@ func ParseArgs() Args {
 		if args.AppHash != "" {
 			panic("--app-hash is provided, but --app-id isn't")
 		}
-		args.AppID = 17349;
+		args.AppID = 17349
 	}
 	if args.AppHash == "" {
 		if args.AppID == 0 {
 			panic("--app-id is provided, but --app-hash isn't")
 		}
-		args.AppHash = "344583e45741c457fe1862106095a5eb";
+		args.AppHash = "344583e45741c457fe1862106095a5eb"
 	}
 	return args
 }
