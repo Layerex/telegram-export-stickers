@@ -38,7 +38,7 @@ func ParseArgs() Args {
 	var args Args
 	end := len(os.Args) - 1
 	for i := 1; i < len(os.Args); i++ {
-		inc := func() {
+		nextArg := func() {
 			if i == end {
 				panic(fmt.Sprintf("Option %s requires a value", os.Args[i]))
 			}
@@ -49,17 +49,17 @@ func ParseArgs() Args {
 			// Options ignored for compatibility
 			continue
 		case "-d", "--directory":
-			inc()
+			nextArg()
 			args.Directory = os.Args[i]
 		case "--app-id":
-			inc()
+			nextArg()
 			argument, err := strconv.Atoi(os.Args[i])
 			if err != nil {
 				panic("--app-id value has to be a 32-bit integer")
 			}
 			args.AppID = int32(argument)
 		case "--app-hash":
-			inc()
+			nextArg()
 			if len(os.Args[i]) != 32 || !IsHex(os.Args[i]) {
 				panic("--app-hash value has to be a hex string of 32 characters")
 			}
