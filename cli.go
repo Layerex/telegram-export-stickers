@@ -49,9 +49,15 @@ func ParseArgs() Args {
 			// Options ignored for compatibility
 			continue
 		case "-d", "--directory":
+			if args.Directory != "" {
+				panic("--directory option is provided more than one time")
+			}
 			nextArg()
 			args.Directory = os.Args[i]
 		case "--app-id":
+			if args.AppID != 0 {
+				panic("--app-id option is provided more than one time")
+			}
 			nextArg()
 			argument, err := strconv.Atoi(os.Args[i])
 			if err != nil {
@@ -59,6 +65,9 @@ func ParseArgs() Args {
 			}
 			args.AppID = int32(argument)
 		case "--app-hash":
+			if args.AppHash != "" {
+				panic("--app-hash option is provided more than one time")
+			}
 			nextArg()
 			if len(os.Args[i]) != 32 || !IsHex(os.Args[i]) {
 				panic("--app-hash value has to be a hex string of 32 characters")
