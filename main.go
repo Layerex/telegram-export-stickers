@@ -92,6 +92,15 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 		Stickers:      make(map[int64]*StickerMetadata),
 	}
 
+	var alreadyExported int
+	printAlreadyExported := func(i int) {
+		if alreadyExported > 1 {
+			fmt.Printf("(%d-%d/%d) Stickers already exported\n", i-alreadyExported+1, i, len(stickerSetRes.Documents))
+		} else if alreadyExported == 1 {
+			fmt.Printf("(%d/%d) Sticker already exported\n", i, len(stickerSetRes.Documents))
+		}
+		alreadyExported = 0
+	}
 	for i, _document := range stickerSetRes.Documents {
 		document := _document.(mtproto.TL_document)
 		metadata.Stickers[document.ID] = &StickerMetadata{Emoticons: "", Date: FormatDate(document.Date)}
@@ -107,15 +116,23 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 		fileInfo, err := os.Stat(filename)
 		exists := !errors.Is(err, os.ErrNotExist)
 		if exists && fileInfo.Size() == int64(document.Size) {
-			fmt.Printf("(%d/%d) Sticker %s already exported\n", i+1, len(stickerSetRes.Documents), filename)
+			alreadyExported++
 		} else {
-			fmt.Printf("(%d/%d) Exporting sticker %s\n", i+1, len(stickerSetRes.Documents), filename)
+			printAlreadyExported(i)
+			fmt.Printf("(%d/%d) Exporting sticker\n", i+1, len(stickerSetRes.Documents))
 			err := t.DownloadDocument(filename, document)
 			if err != nil {
-				fmt.Printf("Failed to export sticker %s: %s\n", filename, err.Error())
+				fmt.Printf("Failed to export sticker: %s\n", err.Error())
 			}
 		}
 	}
+
+	if alreadyExported == len(stickerSetRes.Documents) {
+		fmt.Println("All stickers already exported")
+	} else {
+		printAlreadyExported(len(stickerSetRes.Documents))
+	}
+
 	for _, _pack := range stickerSetRes.Packs {
 		pack := _pack.(mtproto.TL_stickerPack)
 		for _, document := range pack.Documents {
