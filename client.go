@@ -8,16 +8,6 @@ import (
 	"github.com/3bl3gamer/tgclient/mtproto"
 )
 
-type DummyProgressHandler struct{}
-
-func (h *DummyProgressHandler) OnProgress(fileLocation mtproto.TL, offset, size int64) {}
-
-type DummyLogHandler struct{}
-
-func (h *DummyLogHandler) Log(level mtproto.LogLevel, err error, msg string, args ...interface{}) {}
-
-func (h *DummyLogHandler) Message(isIncoming bool, msg mtproto.TL, id int64) {}
-
 type Telegram struct {
 	tgclient.TGClient
 	user mtproto.TL_user
@@ -28,7 +18,7 @@ func (t *Telegram) Request(input mtproto.TLReq) mtproto.TL {
 }
 
 func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_document) error {
-	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &DummyProgressHandler{})
+	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &tgclient.NoopFileProgressHandler{})
 	return err
 }
 
@@ -49,7 +39,7 @@ func (t *Telegram) SignIn(appID int32, appHash string, sessionFilePath string) e
 	} else {
 		sessionStore = &mtproto.SessNoopStore{}
 	}
-	t.TGClient = *tgclient.NewTGClientExt(appConfig, sessionStore, &DummyLogHandler{}, nil)
+	t.TGClient = *tgclient.NewTGClientExt(appConfig, sessionStore, &mtproto.NoopLogHandler{}, nil)
 
 	err := t.InitAndConnect()
 	if err != nil {
