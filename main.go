@@ -154,9 +154,12 @@ func main() {
 			panic(err)
 		}
 	}
-	t.SignIn()
+	err := t.SignIn()
+	if err != nil {
+		panic(err)
+	}
 
-	err := os.MkdirAll(args.Directory, 0755)
+	err = os.MkdirAll(args.Directory, 0755)
 	if err != nil {
 		panic(err)
 	}
