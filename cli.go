@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"path"
 	"strconv"
+
+	"github.com/adrg/xdg"
 )
 
-const helpMessage = `usage: %s [-h] [-d DIRECTORY] [--app-id APP_ID] [--app-hash APP_HASH] [STICKER_SETS ...]
+const helpMessage = `usage: %s [-h] [-d DIRECTORY] [--dont-save-session] [--app-id APP_ID] [--app-hash APP_HASH] [STICKER_SETS ...]
 
 Export sticker sets from telegram.
 
@@ -18,14 +21,18 @@ options:
   -h, --help            Show this help message and exit
   -d DIRECTORY, --directory DIRECTORY
                         Directory to export stickers to
+  --dont-save-session   Don't save session file (and don't use already saved one)
   --app-id APP_ID       Test credentials are used by default
   --app-hash APP_HASH   Test credentials are used by default
   -s, --stickerpacks    Ignored for compatibility
+
+Session file is saved to %s
 `
 
 type Args struct {
 	StickerSetNames []string
 	Directory       string
+	DontSaveSession bool
 	AppID           int32
 	AppHash         string
 }
@@ -53,6 +60,11 @@ func ParseArgs() Args {
 			}
 			nextArg()
 			args.Directory = os.Args[i]
+		case "--dont-save-session":
+			if args.DontSaveSession {
+				panic("--dont-save-session option is provided more than one time")
+			}
+			args.DontSaveSession = true
 		case "--app-id":
 			if args.AppID != 0 {
 				panic("--app-id option is provided more than one time")
@@ -73,7 +85,7 @@ func ParseArgs() Args {
 			}
 			args.AppHash = os.Args[i]
 		case "-h", "--help":
-			fmt.Printf(helpMessage, os.Args[0])
+			fmt.Printf(helpMessage, os.Args[0], path.Join(xdg.DataHome, sessionFile))
 			os.Exit(0)
 		default:
 			var stickerSetName string

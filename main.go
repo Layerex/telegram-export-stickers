@@ -147,13 +147,16 @@ func main() {
 	var t Telegram
 	t.AppID = int32(args.AppID)
 	t.AppHash = args.AppHash
-	sessionFilePath, err := xdg.DataFile(sessionFile)
-	if err != nil {
-		panic(err)
+	if !args.DontSaveSession {
+		var err error
+		t.SessionFilePath, err = xdg.DataFile(sessionFile)
+		if err != nil {
+			panic(err)
+		}
 	}
-	t.SignIn(sessionFilePath)
+	t.SignIn()
 
-	err = os.MkdirAll(args.Directory, 0755)
+	err := os.MkdirAll(args.Directory, 0755)
 	if err != nil {
 		panic(err)
 	}
