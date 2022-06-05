@@ -20,10 +20,7 @@ func (h *DummyLogHandler) Message(isIncoming bool, msg mtproto.TL, id int64) {}
 
 type Telegram struct {
 	tgclient.TGClient
-	user            mtproto.TL_user
-	AppID           int32
-	AppHash         string
-	SessionFilePath string
+	user mtproto.TL_user
 }
 
 func (t *Telegram) Request(input mtproto.TLReq) mtproto.TL {
@@ -35,10 +32,10 @@ func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_documen
 	return err
 }
 
-func (t *Telegram) SignIn() error {
+func (t *Telegram) SignIn(appID int32, appHash string, sessionFilePath string) error {
 	appConfig := &mtproto.AppConfig{
-		AppID:          t.AppID,
-		AppHash:        t.AppHash,
+		AppID:          appID,
+		AppHash:        appHash,
 		AppVersion:     "0.0.1",
 		DeviceModel:    "Unknown",
 		SystemVersion:  runtime.GOOS + "/" + runtime.GOARCH,
@@ -47,8 +44,8 @@ func (t *Telegram) SignIn() error {
 		LangCode:       "en",
 	}
 	var sessionStore mtproto.SessionStore
-	if t.SessionFilePath != "" {
-		sessionStore = &mtproto.SessFileStore{FPath: t.SessionFilePath}
+	if sessionFilePath != "" {
+		sessionStore = &mtproto.SessFileStore{FPath: sessionFilePath}
 	} else {
 		sessionStore = &mtproto.SessNoopStore{}
 	}

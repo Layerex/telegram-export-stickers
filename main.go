@@ -144,17 +144,17 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 func main() {
 	args := ParseArgs()
 
-	var t Telegram
-	t.AppID = int32(args.AppID)
-	t.AppHash = args.AppHash
+	var sessionFilePath string
 	if !args.DontSaveSession {
 		var err error
-		t.SessionFilePath, err = xdg.DataFile(sessionFile)
+		sessionFilePath, err = xdg.DataFile(sessionFile)
 		if err != nil {
 			panic(err)
 		}
 	}
-	err := t.SignIn()
+
+	var t Telegram
+	err := t.SignIn(args.AppID, args.AppHash, sessionFilePath)
 	if err != nil {
 		panic(err)
 	}
