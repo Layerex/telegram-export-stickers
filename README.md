@@ -5,8 +5,7 @@ Export sticker sets from telegram
 ## Installation
 
 ```sh
-go build
-sudo install telegram-export-stickers /usr/local/bin
+sudo make install
 ```
 
 ## Usage
