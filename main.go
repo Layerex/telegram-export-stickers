@@ -16,26 +16,44 @@ const programName = "telegram-export-stickers"
 const sessionFile = programName + "/tg.session"
 
 func (t *Telegram) GetAllStickerSets() ([]mtproto.TL_stickerSet, error) {
+	var archivedStickerSetsLimit int32 = 100
+
 	tl := t.Request(mtproto.TL_messages_getAllStickers{Hash: 0})
 	allStickersRes, ok := tl.(mtproto.TL_messages_allStickers)
 	if !ok {
 		return nil, errors.New("TL_messages_getAllStickers failed")
 	}
+	totalInstalledStickerSets := len(allStickersRes.Sets)
+	fmt.Println(totalInstalledStickerSets, "stickerpacks installed ")
 
-	tl = t.Request(mtproto.TL_messages_getArchivedStickers{OffsetID: 0, Limit: (1 << 31) - 1})
+	fmt.Println("Getting page 1 of archived stickerpacks")
+	tl = t.Request(mtproto.TL_messages_getArchivedStickers{OffsetID: -1, Limit: archivedStickerSetsLimit})
 	archivedStickersRes, ok := tl.(mtproto.TL_messages_archivedStickers)
 	if !ok {
 		return nil, errors.New("TL_messages_getArchivedStickers failed")
 	}
-
-	stickerSets := make([]mtproto.TL_stickerSet, len(allStickersRes.Sets)+len(archivedStickersRes.Sets))
-
-	for i, set := range allStickersRes.Sets {
-		stickerSets[i] = set.(mtproto.TL_stickerSet)
+	// archivedStickersRes.Count includes deleted stickerpacks
+	totalArchivedStickerSets := int(archivedStickersRes.Count-archivedStickerSetsLimit) + len(archivedStickersRes.Sets)
+	totalStickerSets := totalInstalledStickerSets + totalArchivedStickerSets
+	stickerSets := make([]mtproto.TL_stickerSet, 0, totalStickerSets)
+	stickerSets = append(stickerSets, allStickersRes.Sets...)
+	for page := 2; len(stickerSets) != totalStickerSets; page++ {
+		fmt.Println("Getting page", page, "of archived stickerpacks")
+		for _, set := range archivedStickersRes.Sets {
+			stickerSets = append(stickerSets, set.(mtproto.TL_stickerSetCovered).Set)
+		}
+		tl = t.Request(mtproto.TL_messages_getArchivedStickers{OffsetID: stickerSets[len(stickerSets)-1].ID, Limit: archivedStickerSetsLimit})
+		archivedStickersRes, ok = tl.(mtproto.TL_messages_archivedStickers)
+		if !ok {
+			return nil, errors.New("TL_messages_getArchivedStickers failed")
+		}
 	}
-
-	for i, set := range archivedStickersRes.Sets {
-		stickerSets[len(allStickersRes.Sets)+i] = set.(mtproto.TL_stickerSetCovered).Set.(mtproto.TL_stickerSet)
+	fmt.Println(totalArchivedStickerSets, "stickerpacks archived ")
+	archivedStickerSetsDeleted := int(archivedStickersRes.Count) - totalArchivedStickerSets
+	if archivedStickerSetsDeleted == 1 {
+		fmt.Println("1 stickerpack deleted while archived")
+	} else {
+		fmt.Println(archivedStickerSetsDeleted, "stickerpacks deleted while archived")
 	}
 
 	return stickerSets, nil
