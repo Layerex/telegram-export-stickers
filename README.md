@@ -27,5 +27,5 @@ options:
   --app-hash APP_HASH   Test credentials are used by default
   -s, --stickerpacks    Ignored for compatibility
 
-Session file is saved to /home/layerex/.local/share/telegram-export-stickers/tg.session
+Session file is saved to /home/user/.local/share/telegram-export-stickers/tg.session
 ```

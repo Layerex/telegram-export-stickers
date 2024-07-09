@@ -13,7 +13,7 @@ import (
 )
 
 const programName = "telegram-export-stickers"
-const sessionFile = "telegram-export-stickers/tg.session"
+const sessionFile = programName + "/tg.session"
 
 func (t *Telegram) GetAllStickerSets() ([]mtproto.TL_stickerSet, error) {
 	tl := t.Request(mtproto.TL_messages_getAllStickers{Hash: 0})
@@ -61,33 +61,31 @@ type StickerSetMetadata struct {
 	Stickers      map[int64]*StickerMetadata `json:"stickers"`
 }
 
-func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
+func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TL) error {
 	tl := t.Request(mtproto.TL_messages_getStickerSet{Stickerset: inputStickerSet})
 	stickerSetRes, ok := tl.(mtproto.TL_messages_stickerSet)
 	if !ok {
 		return errors.New("TL_messages_getStickerSet failed")
 	}
-	stickerSet := stickerSetRes.Set.(mtproto.TL_stickerSet)
 
-	err := os.Mkdir(stickerSet.ShortName, 0755)
+	err := os.Mkdir(stickerSetRes.Set.ShortName, 0755)
 	if err != nil && !errors.Is(err, os.ErrExist) {
 		return err
 	}
-	err = os.Chdir(stickerSet.ShortName)
+	err = os.Chdir(stickerSetRes.Set.ShortName)
 	if err != nil {
 		return err
 	}
 
 	metadata := StickerSetMetadata{
-		ID:            stickerSet.ID,
-		Title:         stickerSet.Title,
-		ShortName:     stickerSet.ShortName,
-		Count:         stickerSet.Count,
-		Archived:      stickerSet.Archived,
-		Gifs:          stickerSet.Gifs,
-		Masks:         stickerSet.Masks,
-		Official:      stickerSet.Official,
-		InstalledDate: FormatDate(stickerSet.InstalledDate),
+		ID:            stickerSetRes.Set.ID,
+		Title:         stickerSetRes.Set.Title,
+		ShortName:     stickerSetRes.Set.ShortName,
+		Count:         stickerSetRes.Set.Count,
+		Archived:      stickerSetRes.Set.Archived,
+		Masks:         stickerSetRes.Set.Masks,
+		Official:      stickerSetRes.Set.Official,
+		InstalledDate: FormatDate(*stickerSetRes.Set.InstalledDate),
 		ExportedDate:  Now(),
 		Stickers:      make(map[int64]*StickerMetadata),
 	}
@@ -133,8 +131,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TLReq) error {
 		printAlreadyExported(len(stickerSetRes.Documents))
 	}
 
-	for _, _pack := range stickerSetRes.Packs {
-		pack := _pack.(mtproto.TL_stickerPack)
+	for _, pack := range stickerSetRes.Packs {
 		for _, document := range pack.Documents {
 			metadata.Stickers[document].Emoticons += pack.Emoticon
 		}

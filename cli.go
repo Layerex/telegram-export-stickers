@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"path"
+	"regexp"
 	"strconv"
 
 	"github.com/adrg/xdg"
@@ -95,11 +95,10 @@ func ParseArgs() Args {
 				stickerSetName = match[1]
 			} else {
 				// Handle sticker set names
-				if stickerSetNameRegex.MatchString(os.Args[i]) {
-					stickerSetName = os.Args[i]
-				} else {
+				if !stickerSetNameRegex.MatchString(os.Args[i]) {
 					panic(fmt.Sprintf("\"%s\" is not a sticker set name or an url", os.Args[i]))
 				}
+				stickerSetName = os.Args[i]
 			}
 
 			args.StickerSetNames = append(args.StickerSetNames, stickerSetName)

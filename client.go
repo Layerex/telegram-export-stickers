@@ -18,7 +18,7 @@ func (t *Telegram) Request(input mtproto.TLReq) mtproto.TL {
 }
 
 func (t *Telegram) DownloadDocument(filepath string, document mtproto.TL_document) error {
-	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DcID, int64(document.Size), &tgclient.NoopFileProgressHandler{})
+	_, err := t.DownloadFileToPath(filepath, mtproto.TL_inputDocumentFileLocation{ID: document.ID, AccessHash: document.AccessHash, FileReference: document.FileReference}, document.DCID, int64(document.Size), &tgclient.NoopFileProgressHandler{})
 	return err
 }
 
