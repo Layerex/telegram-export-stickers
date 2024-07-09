@@ -5,7 +5,7 @@ Export sticker sets from telegram
 ## Installation
 
 ```sh
-sudo make install
+make install
 ```
 
 ## Usage
