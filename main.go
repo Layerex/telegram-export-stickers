@@ -144,7 +144,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TL) error {
 	}
 
 	if alreadyExported == len(stickerSetRes.Documents) {
-		fmt.Println("All stickers already exported")
+		fmt.Println("Stickerpack already exported")
 	} else {
 		printAlreadyExported(len(stickerSetRes.Documents))
 	}
