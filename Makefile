@@ -1,10 +1,12 @@
 NAME=telegram-export-stickers
 
-make:
+$(NAME):
 	go build
 
-install: make
+install: $(NAME)
 	sudo install $(NAME) /usr/local/bin
 
 lint:
 	revive -config revive.toml
+
+.PHONY: install lint
