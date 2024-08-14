@@ -38,7 +38,7 @@ type Args struct {
 }
 
 func ParseArgs() Args {
-	stickerSetURLRegex := regexp.MustCompile("^(?:http://|https://)?[^/]+/addstickers/([a-zA-Z0-9_]{5,32})/*")
+	stickerSetURLRegex := regexp.MustCompile("^(?:http://|https://)?[^/]+/add(?:stickers|emoji)/([a-zA-Z0-9_]{5,32})/*")
 	stickerSetNameRegex := regexp.MustCompile("[a-zA-Z0-9_]{5,32}")
 
 	var args Args
