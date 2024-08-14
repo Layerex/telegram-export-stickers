@@ -74,7 +74,7 @@ type StickerSetMetadata struct {
 	Gifs          bool                       `json:"gifs"`
 	Masks         bool                       `json:"masks"`
 	Official      bool                       `json:"official"`
-	InstalledDate string                     `json:"installed_date"`
+	InstalledDate *string                    `json:"installed_date"`
 	ExportedDate  string                     `json:"exported_date"`
 	Stickers      map[int64]*StickerMetadata `json:"stickers"`
 }
@@ -95,6 +95,11 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TL) error {
 		return err
 	}
 
+	var installedDate *string
+	if stickerSetRes.Set.InstalledDate != nil {
+		res := FormatDate(*stickerSetRes.Set.InstalledDate)
+		installedDate = &res
+	}
 	metadata := StickerSetMetadata{
 		ID:            stickerSetRes.Set.ID,
 		Title:         stickerSetRes.Set.Title,
@@ -103,7 +108,7 @@ func (t *Telegram) ExportStickerSet(inputStickerSet mtproto.TL) error {
 		Archived:      stickerSetRes.Set.Archived,
 		Masks:         stickerSetRes.Set.Masks,
 		Official:      stickerSetRes.Set.Official,
-		InstalledDate: FormatDate(*stickerSetRes.Set.InstalledDate),
+		InstalledDate: installedDate,
 		ExportedDate:  Now(),
 		Stickers:      make(map[int64]*StickerMetadata),
 	}
