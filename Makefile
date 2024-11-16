@@ -1,6 +1,6 @@
 NAME=telegram-export-stickers
 
-$(NAME):
+$(NAME): main.go client.go cli.go util.go
 	go build
 
 install: $(NAME)
